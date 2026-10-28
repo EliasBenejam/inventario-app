@@ -1,0 +1,8 @@
+# Credenciales de Supabase: nunca subirlas al repositorio
+.env
+backend/.env
+
+# Compilados e IDE
+backend/target/
+.vscode/
+.idea/

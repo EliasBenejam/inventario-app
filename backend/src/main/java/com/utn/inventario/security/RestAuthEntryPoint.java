@@ -1,0 +1,43 @@
+package com.utn.inventario.security;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.utn.inventario.dto.response.ErrorResponse;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.web.AuthenticationEntryPoint;
+import org.springframework.stereotype.Component;
+
+import java.io.IOException;
+import java.time.LocalDateTime;
+
+/**
+ * Se ejecuta cuando se intenta acceder a un endpoint protegido sin
+ * un token JWT valido. Devuelve un JSON consistente con el resto de la API
+ * en lugar de la respuesta 401 vacia por defecto de Spring Security.
+ */
+@Component
+@RequiredArgsConstructor
+public class RestAuthEntryPoint implements AuthenticationEntryPoint {
+
+    private final ObjectMapper objectMapper;
+
+    @Override
+    public void commence(HttpServletRequest request, HttpServletResponse response,
+                          AuthenticationException authException) throws IOException {
+        ErrorResponse body = ErrorResponse.builder()
+                .timestamp(LocalDateTime.now())
+                .status(HttpStatus.UNAUTHORIZED.value())
+                .error(HttpStatus.UNAUTHORIZED.getReasonPhrase())
+                .mensaje("Se requiere autenticación para acceder a este recurso")
+                .path(request.getRequestURI())
+                .build();
+
+        response.setStatus(HttpStatus.UNAUTHORIZED.value());
+        response.setContentType(MediaType.APPLICATION_JSON_VALUE);
+        response.getWriter().write(objectMapper.writeValueAsString(body));
+    }
+}
